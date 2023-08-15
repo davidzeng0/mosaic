@@ -1,35 +1,34 @@
 {
-	"name": "mosaic",
-	"version": "0.0.1",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"dependencies": {
-		"case": "^1.6.3",
-		"electron": "^25.5.0",
-		"js-common": "https://github.com/davidzeng0/js-common.git#dist",
-		"protobuf-ts": "https://github.com/davidzeng0/protobuf-ts.git#dist",
-		"protobufjs": "^7.2.2",
-		"yargs": "^17.7.1"
-	},
-	"devDependencies": {
-		"@types/node": "^18.14.0",
-		"@types/node-fetch": "^2.6.4",
-		"@types/yargs": "^17.0.24",
-		"git-publish": "^2.0.0",
-		"tsup": "^7.2.0",
-		"typescript": "^5.1.6"
-	},
-	"files": [
-		"dist"
-	],
-	"bin": {
-		"mosaic_login": "./login"
-	},
-	"scripts": {
-		"build": "tsup-node --entry.index src/index.ts --minify --keep-names --target esnext --dts --treeshake",
-		"clean": "rm -rf dist",
-		"cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
-		"prepare": "yarn clean && yarn build",
-		"git-publish": "git-publish -b dist"
-	}
+  "name": "mosaic",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "case": "^1.6.3",
+    "electron": "^25.5.0",
+    "js-common": "https://github.com/davidzeng0/js-common.git#dist",
+    "protobuf-ts": "https://github.com/davidzeng0/protobuf-ts.git#dist",
+    "protobufjs": "^7.2.2",
+    "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.0",
+    "@types/node-fetch": "^2.6.4",
+    "@types/yargs": "^17.0.24",
+    "git-publish": "^2.0.0",
+    "tsup": "^7.2.0",
+    "typescript": "^5.1.6"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "mosaic_login": "./login"
+  },
+  "scripts": {
+    "build": "tsup-node --entry.index src/index.ts --minify --keep-names --target esnext --dts --treeshake",
+    "clean": "rm -rf dist",
+    "cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
+    "git-publish": "git-publish -b dist"
+  }
 }

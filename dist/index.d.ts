@@ -1,6 +1,8 @@
-import { GenericError, KV, Request, URLBuilder, Response, Payload, NotFoundError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, UnavailableError, TimedOutError } from 'js-common';
+import { GenericError, Timer, KV, Request, URLBuilder, Response, Payload, NotFoundError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, UnavailableError, TimedOutError } from 'js-common';
 import { Writer, Reader } from 'protobufjs/minimal';
 import { MethodOptions_IdempotencyLevel } from 'protobuf-ts/protos/google/protobuf/descriptor';
+import * as mongodb from 'mongodb';
+import { MongoClient, Collection } from 'mongodb';
 
 type Scope = string;
 type Scopes = Scope[];
@@ -52,6 +54,7 @@ declare abstract class OAuthIssuer {
     abstract exchange(code: string, client: OAuthClient): Promise<AccessToken>;
     abstract refresh(access: AccessToken, refresh: RefreshToken): Promise<AccessToken>;
     abstract revoke(access: AccessToken): Promise<void>;
+    toString(token: Token): string;
 }
 
 declare class Credentials {
@@ -67,23 +70,23 @@ interface Metadata {
     [key: string]: string | undefined;
 }
 interface RefreshToken$1 {
+    id?: string;
     issuer: string;
-    id: string;
     type?: string;
     secret: string;
     expire?: number;
     metadata?: Metadata;
 }
 interface AccessToken$1 {
+    id?: string;
     issuer: string;
-    id: string;
-    client: string;
     type?: string;
     secret: string;
-    scopes: Scopes;
     expire?: number;
-    refresher?: string;
     metadata?: Metadata;
+    client: string;
+    scopes: Scopes;
+    refresher?: string;
 }
 interface Issuer {
     name: string;
@@ -102,76 +105,112 @@ declare namespace storage$1 {
   };
 }
 
+interface TokenInit {
+    id?: string;
+    issuer: OAuthIssuer;
+    type?: string;
+    secret: string;
+    expire?: number;
+    metadata?: Metadata;
+}
 declare class Token extends Credentials {
-    private static counter;
-    static createId(): string;
-    readonly type: string | undefined;
-    readonly secret: string;
-    readonly issuer: OAuthIssuer;
-    readonly id: string;
-    readonly expire: number | undefined;
-    readonly metadata: Metadata | undefined;
-    constructor(args: {
-        issuer: OAuthIssuer;
-        id?: string;
-        type?: string;
-        secret: string;
-        expire?: number;
-        metadata?: Metadata;
-    });
+    id: string | undefined;
+    issuer: OAuthIssuer;
+    expire: number | undefined;
+    type: string | undefined;
+    secret: string;
+    metadata: Metadata | undefined;
+    constructor(args: TokenInit);
+    get expired(): boolean;
     toString(): string;
 }
 declare class RefreshToken extends Token {
-    constructor(args: {
-        issuer: OAuthIssuer;
-        id?: string;
-        type?: string;
-        secret: string;
-        expire?: number;
-        metadata?: Metadata;
-    });
+    constructor(args: TokenInit);
+}
+interface AccessTokenInit extends TokenInit {
+    client: string;
+    scopes: Scopes;
+    refresher?: RefreshToken;
 }
 declare class AccessToken extends Token {
-    readonly client: string;
-    readonly scopes: Scopes;
-    readonly refresher: RefreshToken | undefined;
+    client: string;
+    scopes: Scopes;
+    refresher: RefreshToken | undefined;
     private refreshPromise?;
-    constructor(args: {
-        issuer: OAuthIssuer;
-        id?: string;
-        client: string;
-        type?: string;
-        secret: string;
-        scopes: Scopes;
-        expire?: number;
-        refresher?: RefreshToken;
-        metadata?: Metadata;
-    });
+    constructor(args: AccessTokenInit);
+    private assignToken;
     private doRefresh;
-    get expired(): boolean;
-    refresh(): Promise<void>;
+    refresh(): Promise<any>;
     revoke(): Promise<void>;
     get meta(): Metadata | undefined;
 }
 
 declare function login(): Promise<AccessToken>;
 
+declare abstract class StorageMedium {
+    abstract setKey(key: string, value: string): void | Promise<void>;
+    abstract getKey(key: string): string | undefined | Promise<string | undefined>;
+    abstract deleteKey(key: string): void | Promise<void>;
+    abstract addToken(token: Token): void | Promise<void>;
+    abstract updateToken(token: Token): void | Promise<void>;
+    abstract deleteToken(token: Token): void | Promise<void>;
+    abstract getRefreshToken(id: string): RefreshToken | undefined | Promise<RefreshToken | undefined>;
+    abstract getAccessToken(id: string): AccessToken | undefined | Promise<AccessToken | undefined>;
+    abstract synchronized(access: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): void | Promise<void>;
+    abstract listAllKeys(): Map<string, string> | Promise<Map<string, string>>;
+    abstract listAllRefreshTokens(): RefreshToken$1[] | Promise<RefreshToken$1[]>;
+    abstract listAllAccessTokens(): AccessToken$1[] | Promise<AccessToken$1[]>;
+}
+declare class DatabaseStorageMedium extends StorageMedium {
+    url: string;
+    db: string;
+    client: MongoClient;
+    keys: Collection<{
+        key: string;
+        value: string;
+    }>;
+    refreshTokens: Collection<RefreshToken$1>;
+    accessTokens: Collection<AccessToken$1>;
+    ready?: Promise<void>;
+    shouldClose: boolean;
+    operations: number;
+    closeTimeout: Timer;
+    constructor(url: string, db: string);
+    createIndex(collection: Collection<any>, fields: KV<number | {
+        direction: number;
+        unique?: true;
+    }>): Promise<string[]>;
+    initialize(): Promise<void>;
+    close(): void;
+    destroy(): void;
+    setup(): Promise<void>;
+    runDbOp<T>(fn: () => Promise<T>): Promise<T>;
+    setKey(key: string, value: string): Promise<void>;
+    getKey(key: string): Promise<string | undefined>;
+    deleteKey(key: string): Promise<void>;
+    addToken(token: Token): Promise<void>;
+    updateToken(token: Token): Promise<void>;
+    deleteToken(token: Token): Promise<void>;
+    getRefreshToken(id: string): Promise<RefreshToken | undefined>;
+    getAccessToken(id: string): Promise<AccessToken | undefined>;
+    synchronized(token: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): Promise<void>;
+    listAllKeys(): Promise<Map<string, string>>;
+    listAllRefreshTokens(): Promise<mongodb.WithId<RefreshToken$1>[]>;
+    listAllAccessTokens(): Promise<mongodb.WithId<AccessToken$1>[]>;
+}
 declare class Store {
+    private static medium;
     private constructor();
-    private static config?;
-    private static saving?;
-    private static queuedSave;
-    private static refreshTokens;
-    private static accessTokens;
     private static initialize;
-    static setKey(path: string, value: any): void;
-    static getKey(path: string): any;
-    static add(token: AccessToken | RefreshToken): void;
-    static updated(token: AccessToken | RefreshToken): void;
-    static getRefreshToken(id: string): RefreshToken;
-    static getAccessToken(id: string): AccessToken;
-    private static saveTokens;
-    private static save;
+    static setKey(key: string, value: string): Promise<void>;
+    static getKey(key: string): Promise<string | undefined>;
+    static deleteKey(key: string): Promise<void>;
+    static addToken(token: Token): Promise<void>;
+    static updateToken(token: Token): Promise<void>;
+    static deleteToken(token: Token): Promise<void>;
+    static getRefreshToken(id: string): Promise<RefreshToken>;
+    static getAccessToken(id: string): Promise<AccessToken>;
+    static synchronized(token: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): void | Promise<void>;
 }
 
 declare class OAuthProvider {
@@ -193,6 +232,8 @@ declare function launch(path: string, options?: any): Promise<any[]>;
 
 type index$1_AccessToken = AccessToken;
 declare const index$1_AccessToken: typeof AccessToken;
+type index$1_DatabaseStorageMedium = DatabaseStorageMedium;
+declare const index$1_DatabaseStorageMedium: typeof DatabaseStorageMedium;
 declare const index$1_DefaultOAuthProvider: typeof DefaultOAuthProvider;
 type index$1_IPCMessage = IPCMessage;
 type index$1_InvalidCredentialsError = InvalidCredentialsError;
@@ -227,6 +268,7 @@ declare const index$1_login: typeof login;
 declare namespace index$1 {
   export {
     index$1_AccessToken as AccessToken,
+    index$1_DatabaseStorageMedium as DatabaseStorageMedium,
     index$1_DefaultOAuthProvider as DefaultOAuthProvider,
     index$1_IPCMessage as IPCMessage,
     index$1_InvalidCredentialsError as InvalidCredentialsError,
@@ -284,7 +326,7 @@ declare class ProtoServiceDefinition {
 
 declare class ApiRequest extends Request {
     readonly url: URLBuilder;
-    constructor();
+    constructor(url?: string);
     get https(): boolean;
     execute(): Promise<Response>;
 }

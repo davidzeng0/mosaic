@@ -7,6 +7,7 @@
 		"case": "^1.6.3",
 		"electron": "^25.5.0",
 		"js-common": "https://github.com/davidzeng0/js-common.git#dist",
+		"mongodb": "^5.7.0",
 		"protobuf-ts": "https://github.com/davidzeng0/protobuf-ts.git#dist",
 		"protobufjs": "^7.2.2",
 		"yargs": "^17.7.1"
@@ -23,10 +24,12 @@
 		"dist"
 	],
 	"bin": {
-		"mosaic_login": "./login"
+		"mosaic_login": "./login",
+		"mosaic_export_credentials": "./export_credentials",
+		"mosaic_import_credentials": "./import_credentials"
 	},
 	"scripts": {
-		"build": "tsup-node --entry.index src/index.ts --minify --keep-names --target esnext --dts --treeshake",
+		"build": "tsup-node --entry.index src/index.ts --entry.export_credentials src/tools/export_credentials.process.ts --entry.import_credentials src/tools/import_credentials.process.ts --minify --keep-names --target esnext --dts --treeshake",
 		"clean": "rm -rf dist",
 		"cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
 		"prepare": "yarn clean && yarn build",

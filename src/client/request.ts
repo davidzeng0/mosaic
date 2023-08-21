@@ -3,9 +3,9 @@ import { Request, Response, URLBuilder } from 'js-common';
 export class ApiRequest extends Request{
 	readonly url;
 
-	constructor(){
+	constructor(url?: string){
 		super();
-		this.url = new URLBuilder();
+		this.url = new URLBuilder(url);
 	}
 
 	get https(){

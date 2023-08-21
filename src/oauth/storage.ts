@@ -9,8 +9,8 @@ export interface Metadata{
 }
 
 export interface RefreshToken{
+	id?: string;
 	issuer: string;
-	id: string;
 	type?: string;
 	secret: string;
 	expire?: number;
@@ -18,15 +18,15 @@ export interface RefreshToken{
 }
 
 export interface AccessToken{
+	id?: string;
 	issuer: string;
-	id: string;
-	client: string;
 	type?: string;
 	secret: string;
-	scopes: Scopes;
 	expire?: number;
-	refresher?: string;
 	metadata?: Metadata;
+	client: string;
+	scopes: Scopes;
+	refresher?: string;
 }
 
 export interface Issuer{

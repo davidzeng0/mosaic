@@ -1,4 +1,4 @@
-import { OAuthClient, Scopes, AccessToken, RefreshToken } from '.';
+import { OAuthClient, Scopes, AccessToken, RefreshToken, Token } from '.';
 
 export interface OAuthOptions{
 	noUI?: boolean;
@@ -21,4 +21,10 @@ export abstract class OAuthIssuer{
 	abstract exchange(code: string, client: OAuthClient): Promise<AccessToken>;
 	abstract refresh(access: AccessToken, refresh: RefreshToken): Promise<AccessToken>;
 	abstract revoke(access: AccessToken): Promise<void>;
+
+	toString(token: Token){
+		if(token.type)
+			return `${token.type} ${token.secret}`;
+		return token.secret;
+	}
 }

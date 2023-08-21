@@ -1,10 +1,11 @@
 import { DefaultOAuthProvider } from './provider';
 import { Config } from 'protobuf-ts';
+import { Store } from './store';
 
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs';
 
-export function login(){
+export async function login(){
 	let args = yargs(hideBin(process.argv)).parseSync() as any;
 	let client = args._.join(' ');
 
@@ -21,5 +22,9 @@ export function login(){
 	delete args.scope;
 	delete args.config;
 
-	return issuer.perform(authClient, scopes, args);
+	let token = await issuer.perform(authClient, scopes, args);
+
+	await Store.addToken(token);
+
+	return token;
 }

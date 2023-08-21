@@ -2,83 +2,64 @@ import { Credentials } from '@/client/credentials';
 import { Store, OAuthIssuer, InvalidCredentialsError, Scopes } from '.';
 import * as Storage from './storage';
 
+interface TokenInit{
+	id?: string;
+	issuer: OAuthIssuer
+	type?: string;
+	secret: string;
+	expire?: number;
+	metadata?: Storage.Metadata;
+}
+
 export class Token extends Credentials{
-	private static counter = 0;
+	id;
+	issuer;
+	expire;
+	type;
+	secret;
+	metadata;
 
-	static createId(){
-		let buffer = Buffer.alloc(12);
-
-		buffer.writeBigUInt64BE(BigInt(Date.now()), 0);
-		buffer.writeUint32BE(this.counter, 8);
-
-		this.counter++;
-
-		if(this.counter >= 2 ** 31 - 1)
-			this.counter = 0;
-		return buffer.toString('hex');
-	}
-
-	readonly type;
-	readonly secret;
-	readonly issuer;
-	readonly id;
-	readonly expire;
-	readonly metadata;
-
-	constructor(args: {
-		issuer: OAuthIssuer
-		id?: string;
-		type?: string;
-		secret: string;
-		expire?: number;
-		metadata?: Storage.Metadata;
-	}){
+	constructor(args: TokenInit){
 		super();
+		this.id = args.id;
 		this.issuer = args.issuer;
-		this.id = args.id ?? Token.createId();
 		this.expire = args.expire;
 		this.type = args.type;
 		this.secret = args.secret;
 		this.metadata = args.metadata;
 	}
 
+	get expired(){
+		if(this.expire === undefined)
+			return false;
+		return Date.now() > this.expire * 1000;
+	}
+
 	override toString(){
-		if(this.type)
-			return `${this.type} ${this.secret}`;
-		return this.secret;
+		return this.issuer.toString(this);
 	}
 }
 
 export class RefreshToken extends Token{
-	constructor(args: {
-		issuer: OAuthIssuer
-		id?: string;
-		type?: string;
-		secret: string;
-		expire?: number;
-		metadata?: Storage.Metadata;
-	}){
+	constructor(args: TokenInit){
 		super(args);
 	}
 }
 
-export class AccessToken extends Token{
-	readonly client;
-	readonly scopes;
-	readonly refresher;
-	private refreshPromise?: Promise<void>;
+interface AccessTokenInit extends TokenInit{
+	client: string;
+	scopes: Scopes;
+	refresher?: RefreshToken;
+}
 
-	constructor(args: {
-		issuer: OAuthIssuer,
-		id?: string;
-		client: string;
-		type?: string;
-		secret: string;
-		scopes: Scopes;
-		expire?: number;
-		refresher?: RefreshToken,
-		metadata?: Storage.Metadata;
-	}){
+export class AccessToken extends Token{
+	client;
+	scopes;
+	refresher;
+
+	private refreshPromise?: Promise<any>;
+
+	constructor(args: AccessTokenInit){
 		super(args);
 
 		this.client = args.client;
@@ -86,23 +67,23 @@ export class AccessToken extends Token{
 		this.refresher = args.refresher;
 	}
 
-	private async doRefresh(){
-		let token = await this.issuer.refresh(this, this.refresher!);
-
-		Object.assign(this, {
-			expire: token.expire,
-			type: token.type,
-			secret: token.secret,
-			scopes: token.scopes
-		});
-
-		Store.updated(this);
+	private assignToken(token: AccessToken){
+		this.expire = token.expire;
+		this.type = token.type;
+		this.secret = token.secret;
+		this.scopes = token.scopes;
+		this.metadata = token.metadata;
 	}
 
-	get expired(){
-		if(this.expire === undefined)
-			return false;
-		return Date.now() > this.expire * 1000;
+	private async doRefresh(){
+		if(!this.id)
+			return this.assignToken(await this.issuer.refresh(this, this.refresher!));
+		await Store.synchronized(this, async (token) => {
+			if(token && token.secret != this.secret)
+				this.assignToken(token);
+			else
+				this.assignToken(await this.issuer.refresh(this, this.refresher!));
+		});
 	}
 
 	refresh(){
@@ -121,6 +102,7 @@ export class AccessToken extends Token{
 
 	revoke(){
 		return this.issuer.revoke(this);
+
 	}
 
 	get meta(){

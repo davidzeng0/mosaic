@@ -369,7 +369,11 @@ export class DatabaseStorageMedium extends StorageMedium{
 
 			if(!token)
 				return undefined;
-			return createAccessToken(token);
+			let refresher;
+
+			if(token.refresher)
+				refresher = await this.getRefreshToken(token.refresher);
+			return createAccessToken(token, refresher);
 		});
 	}
 

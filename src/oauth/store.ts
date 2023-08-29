@@ -307,10 +307,10 @@ export class DatabaseStorageMedium extends StorageMedium{
 		return promise;
 	}
 
-	override async setKey(key: string, value: string){
-		await this.runDbOp(
+	override setKey(key: string, value: string){
+		return this.runDbOp(
 			() => this.keys.updateOne({key}, {$set: {key, value}}, {upsert: true})
-		);
+		) as any;
 	}
 
 	override getKey(key: string){
@@ -319,38 +319,38 @@ export class DatabaseStorageMedium extends StorageMedium{
 		);
 	}
 
-	override async deleteKey(key: string){
-		await this.runDbOp(
+	override deleteKey(key: string){
+		return this.runDbOp(
 			() => this.keys.deleteOne({key})
-		);
+		) as any;
 	}
 
-	override async addToken(token: Token){
+	override addToken(token: Token){
 		let json = tokenToJson(token);
 
-		await this.runDbOp(() => {
+		return this.runDbOp(() => {
 			let collection = token instanceof AccessToken ? this.accessTokens : this.refreshTokens;
 
 			return collection!.insertOne(json as any);
-		});
+		}) as any;
 	}
 
-	override async updateToken(token: Token){
+	override updateToken(token: Token){
 		let json = tokenToJson(token);
 
-		await this.runDbOp(() => {
+		return this.runDbOp(() => {
 			let collection = token instanceof AccessToken ? this.accessTokens : this.refreshTokens;
 
 			return collection!.updateOne({id: json.id}, {$set: json})
-		});
+		}) as any;
 	}
 
-	override async deleteToken(token: Token){
-		await this.runDbOp(() => {
+	override deleteToken(token: Token){
+		return this.runDbOp(() => {
 			let collection = token instanceof AccessToken ? this.accessTokens : this.refreshTokens;
 
 			return collection!.deleteOne({id: token.id});
-		});
+		}) as any;
 	}
 
 	override getRefreshToken(id: string){
@@ -632,52 +632,62 @@ export class Store{
 		this.medium = new MemoryStorageMedium();
 	}
 
-	static async setKey(key: string, value: string){
+	static setKey(key: string, value: string){
 		this.initialize();
 
-		await this.medium.setKey(key, value);
+		return this.medium.setKey(key, value);
 	}
 
-	static async getKey(key: string){
+	static getKey(key: string){
 		this.initialize();
 
-		return await this.medium.getKey(key);
+		return this.medium.getKey(key);
 	}
 
-	static async deleteKey(key: string){
+	static deleteKey(key: string){
 		this.initialize();
 
-		await this.medium.deleteKey(key);
+		return this.medium.deleteKey(key);
 	}
 
-	static async addToken(token: Token){
-		this.initialize();
+	static addToken(token: Token){
+		let promise = (async() => {
+			this.initialize();
 
-		if(token.id)
-			throw new ExistsError('Token already added');
-		token.id = new ObjectId().toHexString();
+			if(token.id)
+				throw new ExistsError('Token already added');
+			token.id = new ObjectId().toHexString();
 
-		if(token instanceof AccessToken && token.refresher && !token.refresher.id)
-			await this.addToken(token.refresher);
-		await this.medium.addToken(token);
+			if(token instanceof AccessToken && token.refresher && !token.refresher.id)
+				await this.addToken(token.refresher);
+			await this.medium.addToken(token);
+		})();
+
+		promise.catch(() => {});
+
+		return promise;
 	}
 
-	static async updateToken(token: Token){
+	static updateToken(token: Token){
 		this.initialize();
 
 		if(!token.id)
 			throw new NotFoundError('Token not added');
-		await this.medium.updateToken(token);
+		return this.medium.updateToken(token);
 	}
 
-	static async deleteToken(token: Token){
-		this.initialize();
+	static deleteToken(token: Token){
+		let promise = (async() => {
+			this.initialize();
 
-		if(!token.id)
-			throw new NotFoundError('Token not added');
-		await this.medium.deleteToken(token);
+			if(!token.id)
+				throw new NotFoundError('Token not added');
+			await this.medium.deleteToken(token);
 
-		token.id = undefined;
+			token.id = undefined;
+		})();
+
+		return promise;
 	}
 
 	static async getRefreshToken(id: string){

@@ -239,6 +239,8 @@ export class DatabaseStorageMedium extends StorageMedium{
 		try{
 			await this.client.connect();
 		}catch(e){
+			this.close();
+
 			throw new DatabaseError(e);
 		}
 
@@ -255,7 +257,7 @@ export class DatabaseStorageMedium extends StorageMedium{
 				this.createIndex(this.accessTokens, {id: {direction: 1, unique: true}, refresher: 1})
 			]);
 		}catch(e){
-			this.client.close();
+			this.close();
 
 			throw new DatabaseError(e);
 		}

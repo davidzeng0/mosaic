@@ -202,11 +202,11 @@ declare class Store {
     private static medium;
     private constructor();
     private static initialize;
-    static setKey(key: string, value: string): Promise<void>;
-    static getKey(key: string): Promise<string | undefined>;
-    static deleteKey(key: string): Promise<void>;
+    static setKey(key: string, value: string): void | Promise<void>;
+    static getKey(key: string): string | Promise<string | undefined> | undefined;
+    static deleteKey(key: string): void | Promise<void>;
     static addToken(token: Token): Promise<void>;
-    static updateToken(token: Token): Promise<void>;
+    static updateToken(token: Token): void | Promise<void>;
     static deleteToken(token: Token): Promise<void>;
     static getRefreshToken(id: string): Promise<RefreshToken>;
     static getAccessToken(id: string): Promise<AccessToken>;

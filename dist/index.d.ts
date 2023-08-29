@@ -185,12 +185,12 @@ declare class DatabaseStorageMedium extends StorageMedium {
     destroy(): void;
     setup(): Promise<void>;
     runDbOp<T>(fn: () => Promise<T>): Promise<T>;
-    setKey(key: string, value: string): Promise<void>;
+    setKey(key: string, value: string): any;
     getKey(key: string): Promise<string | undefined>;
-    deleteKey(key: string): Promise<void>;
-    addToken(token: Token): Promise<void>;
-    updateToken(token: Token): Promise<void>;
-    deleteToken(token: Token): Promise<void>;
+    deleteKey(key: string): any;
+    addToken(token: Token): any;
+    updateToken(token: Token): any;
+    deleteToken(token: Token): any;
     getRefreshToken(id: string): Promise<RefreshToken | undefined>;
     getAccessToken(id: string): Promise<AccessToken | undefined>;
     synchronized(token: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): Promise<void>;

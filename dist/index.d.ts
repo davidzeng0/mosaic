@@ -1,4 +1,4 @@
-import { GenericError, Timer, KV, Request, URLBuilder, Response, Payload, NotFoundError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, UnavailableError, TimedOutError } from 'js-common';
+import { GenericError, Timer, KV, Request, URLBuilder, Response, Payload, NotFoundError, UnavailableError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, TimedOutError } from 'js-common';
 import { Writer, Reader } from 'protobufjs/minimal';
 import { MethodOptions_IdempotencyLevel } from 'protobuf-ts/protos/google/protobuf/descriptor';
 import * as mongodb from 'mongodb';
@@ -458,7 +458,7 @@ declare const DefaultServiceProvider: ServiceProvider;
 
 declare class HttpStatus {
     private constructor();
-    static errorFrom(res: Response, message?: string, type?: string): InvalidCredentialsError | NotFoundError | UnsupportedError | UnimplementedError | InvalidArgumentError | PermissionDeniedError | PreconditionFailedError | RateLimitedError | InternalServerError | NetworkError | UnavailableError | TimedOutError;
+    static errorFrom(res: Response, message?: string, type?: string): InvalidCredentialsError | NotFoundError | UnavailableError | UnsupportedError | UnimplementedError | InvalidArgumentError | PermissionDeniedError | PreconditionFailedError | RateLimitedError | InternalServerError | NetworkError | TimedOutError;
 }
 
 type index_ApiKey = ApiKey;

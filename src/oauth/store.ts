@@ -1,4 +1,4 @@
-import { ExistsError, GenericError, KV, NotFoundError, Promises, Timer } from 'js-common';
+import { ExistsError, GenericError, KV, NotFoundError, Promises, Timer, UnavailableError } from 'js-common';
 import { DefaultOAuthProvider, AccessToken, RefreshToken, Token } from '.';
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb';
 import { Config } from 'protobuf-ts';
@@ -241,7 +241,7 @@ export class DatabaseStorageMedium extends StorageMedium{
 		}catch(e){
 			this.close();
 
-			throw new DatabaseError(e);
+			throw new UnavailableError(e);
 		}
 
 		let db = this.client.db(this.db);

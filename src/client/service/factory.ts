@@ -3,7 +3,7 @@ import { Service, ServiceMethod } from '../service';
 import * as Storage from '../storage';
 
 export class ServiceFactory{
-	private static installMethod(service: Storage.Service, prototype: KV<Function>, name: string, method: ServiceMethod){
+	private static installMethod(service: Storage.Service, prototype: KV<any>, name: string, method: ServiceMethod){
 		prototype[name] = function(this: Service, message: any){
 			this.preflight();
 

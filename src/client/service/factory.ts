@@ -6,7 +6,7 @@ import * as Storage from '../storage';
 export class ServiceFactory{
 	private static bindTransact(method: string, path: string, transport: Transport, contentType: string | undefined){
 		return function(this: Service, message: any){
-			this.transact(method, path, transport, contentType, message);
+			return this.transact(method, path, transport, contentType, message);
 		};
 	}
 

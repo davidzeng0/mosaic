@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-const { OAuth } = require('.');
+const { OAuthTools } = require('.');
 
-OAuth.login();
+OAuthTools.login();

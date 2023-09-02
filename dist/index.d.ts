@@ -1,8 +1,6 @@
-import { GenericError, Timer, KV, Request, URLBuilder, Response, Payload, NotFoundError, UnavailableError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, TimedOutError } from 'js-common';
+import { GenericError, KV, Request, URLBuilder, Response, Payload, UnavailableError, NotFoundError, UnsupportedError, UnimplementedError, InvalidArgumentError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, InternalServerError, NetworkError, TimedOutError } from 'js-common';
 import { Writer, Reader } from 'protobufjs/minimal';
 import { MethodOptions_IdempotencyLevel } from 'protobuf-ts/protos/google/protobuf/descriptor';
-import * as mongodb from 'mongodb';
-import { MongoClient, Collection } from 'mongodb';
 
 type Scope = string;
 type Scopes = Scope[];
@@ -145,60 +143,11 @@ declare class AccessToken extends Token {
     get meta(): Metadata | undefined;
 }
 
-declare function login(): Promise<AccessToken>;
-
-declare abstract class StorageMedium {
-    abstract setKey(key: string, value: string): void | Promise<void>;
-    abstract getKey(key: string): string | undefined | Promise<string | undefined>;
-    abstract deleteKey(key: string): void | Promise<void>;
-    abstract addToken(token: Token): void | Promise<void>;
-    abstract updateToken(token: Token): void | Promise<void>;
-    abstract deleteToken(token: Token): void | Promise<void>;
-    abstract getRefreshToken(id: string): RefreshToken | undefined | Promise<RefreshToken | undefined>;
-    abstract getAccessToken(id: string): AccessToken | undefined | Promise<AccessToken | undefined>;
-    abstract synchronized(access: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): void | Promise<void>;
-    abstract listAllKeys(): Map<string, string> | Promise<Map<string, string>>;
-    abstract listAllRefreshTokens(): RefreshToken$1[] | Promise<RefreshToken$1[]>;
-    abstract listAllAccessTokens(): AccessToken$1[] | Promise<AccessToken$1[]>;
+declare class DatabaseError extends GenericError {
+    constructor(arg?: any);
 }
-declare class DatabaseStorageMedium extends StorageMedium {
-    url: string;
-    db: string;
-    client: MongoClient;
-    keys: Collection<{
-        key: string;
-        value: string;
-    }>;
-    refreshTokens: Collection<RefreshToken$1>;
-    accessTokens: Collection<AccessToken$1>;
-    ready?: Promise<void>;
-    shouldClose: boolean;
-    operations: number;
-    closeTimeout: Timer;
-    constructor(url: string, db: string);
-    createIndex(collection: Collection<any>, fields: KV<number | {
-        direction: number;
-        unique?: true;
-    }>): Promise<string[]>;
-    initialize(): Promise<void>;
-    close(): void;
-    destroy(): void;
-    setup(): Promise<void>;
-    runDbOp<T>(fn: () => Promise<T>): Promise<T>;
-    setKey(key: string, value: string): any;
-    getKey(key: string): Promise<string | undefined>;
-    deleteKey(key: string): any;
-    addToken(token: Token): any;
-    updateToken(token: Token): any;
-    deleteToken(token: Token): any;
-    getRefreshToken(id: string): Promise<RefreshToken | undefined>;
-    getAccessToken(id: string): Promise<AccessToken | undefined>;
-    synchronized(token: AccessToken, callback: (token?: AccessToken) => void | Promise<void>): Promise<void>;
-    listAllKeys(): Promise<Map<string, string>>;
-    listAllRefreshTokens(): Promise<mongodb.WithId<RefreshToken$1>[]>;
-    listAllAccessTokens(): Promise<mongodb.WithId<AccessToken$1>[]>;
-}
-declare class Store {
+declare class CredentialStore {
+    private static DatabaseStorageMedium;
     private static medium;
     private constructor();
     private static initialize;
@@ -230,67 +179,13 @@ interface IPCMessage {
 }
 declare function launch(path: string, options?: any): Promise<any[]>;
 
-type index$1_AccessToken = AccessToken;
-declare const index$1_AccessToken: typeof AccessToken;
-type index$1_DatabaseStorageMedium = DatabaseStorageMedium;
-declare const index$1_DatabaseStorageMedium: typeof DatabaseStorageMedium;
-declare const index$1_DefaultOAuthProvider: typeof DefaultOAuthProvider;
-type index$1_IPCMessage = IPCMessage;
-type index$1_InvalidCredentialsError = InvalidCredentialsError;
-declare const index$1_InvalidCredentialsError: typeof InvalidCredentialsError;
-type index$1_InvalidScopeError = InvalidScopeError;
-declare const index$1_InvalidScopeError: typeof InvalidScopeError;
-type index$1_OAuthClient = OAuthClient;
-type index$1_OAuthConfig = OAuthConfig;
-type index$1_OAuthError = OAuthError;
-declare const index$1_OAuthError: typeof OAuthError;
-type index$1_OAuthIssuer = OAuthIssuer;
-declare const index$1_OAuthIssuer: typeof OAuthIssuer;
-type index$1_OAuthOptions = OAuthOptions;
-type index$1_OAuthProvider = OAuthProvider;
-declare const index$1_OAuthProvider: typeof OAuthProvider;
-type index$1_RefreshToken = RefreshToken;
-declare const index$1_RefreshToken: typeof RefreshToken;
-type index$1_Scope = Scope;
-declare const index$1_Scopes: typeof Scopes;
-type index$1_Store = Store;
-declare const index$1_Store: typeof Store;
-type index$1_Token = Token;
-declare const index$1_Token: typeof Token;
-type index$1_UnauthorizedClientError = UnauthorizedClientError;
-declare const index$1_UnauthorizedClientError: typeof UnauthorizedClientError;
-type index$1_UnrecognizedIDClientError = UnrecognizedIDClientError;
-declare const index$1_UnrecognizedIDClientError: typeof UnrecognizedIDClientError;
-type index$1_UserDeniedError = UserDeniedError;
-declare const index$1_UserDeniedError: typeof UserDeniedError;
-declare const index$1_launch: typeof launch;
-declare const index$1_login: typeof login;
-declare namespace index$1 {
-  export {
-    index$1_AccessToken as AccessToken,
-    index$1_DatabaseStorageMedium as DatabaseStorageMedium,
-    index$1_DefaultOAuthProvider as DefaultOAuthProvider,
-    index$1_IPCMessage as IPCMessage,
-    index$1_InvalidCredentialsError as InvalidCredentialsError,
-    index$1_InvalidScopeError as InvalidScopeError,
-    index$1_OAuthClient as OAuthClient,
-    index$1_OAuthConfig as OAuthConfig,
-    index$1_OAuthError as OAuthError,
-    index$1_OAuthIssuer as OAuthIssuer,
-    index$1_OAuthOptions as OAuthOptions,
-    index$1_OAuthProvider as OAuthProvider,
-    index$1_RefreshToken as RefreshToken,
-    index$1_Scope as Scope,
-    index$1_Scopes as Scopes,
-    storage$1 as Storage,
-    index$1_Store as Store,
-    index$1_Token as Token,
-    index$1_UnauthorizedClientError as UnauthorizedClientError,
-    index$1_UnrecognizedIDClientError as UnrecognizedIDClientError,
-    index$1_UserDeniedError as UserDeniedError,
-    index$1_launch as launch,
-    index$1_login as login,
-  };
+declare class OAuthTools {
+    private static optionsFromCmdLine;
+    static login(options?: {
+        client: string;
+        scopes: string[];
+        args: KV<any>;
+    }): Promise<AccessToken>;
 }
 
 interface ProtoMessage<T = any> {
@@ -369,6 +264,10 @@ interface ServiceMethod$1 {
     body?: string;
     transport: string[];
 }
+interface ServiceImplementation {
+    protoOverREST?: ProtoServiceDefinition;
+    gRPC?: ProtoServiceDefinition;
+}
 interface Service$1 {
     name: string;
     id: string;
@@ -377,7 +276,7 @@ interface Service$1 {
     endpoints: ServiceEndpoint[];
     basePath?: string;
     version?: string;
-    implementation?: ProtoServiceDefinition;
+    implementation?: ServiceImplementation;
     methods?: ServiceMethod$1[];
 }
 interface ClientOption {
@@ -397,6 +296,7 @@ interface Client {
 type storage_Client = Client;
 type storage_ClientOption = ClientOption;
 type storage_ServiceEndpoint = ServiceEndpoint;
+type storage_ServiceImplementation = ServiceImplementation;
 type storage_Transport = Transport;
 declare namespace storage {
   export {
@@ -404,6 +304,7 @@ declare namespace storage {
     storage_ClientOption as ClientOption,
     Service$1 as Service,
     storage_ServiceEndpoint as ServiceEndpoint,
+    storage_ServiceImplementation as ServiceImplementation,
     ServiceMethod$1 as ServiceMethod,
     storage_Transport as Transport,
   };
@@ -441,6 +342,10 @@ declare class Service {
     constructor(service: Service$1, client: Client$1, methods: KV<ServiceMethod>, options?: ServiceOptions);
     private selectTransport;
     private processClientOptions;
+    protected preflight(): void;
+    protected getFullPath(path: string): string;
+    protected transact(method: string, path: string, transport: Transport$1, contentType: string | undefined, message: any): Promise<any>;
+    toString(): string;
 }
 
 declare class ServiceProvider {
@@ -456,41 +361,26 @@ declare class ServiceProvider {
 }
 declare const DefaultServiceProvider: ServiceProvider;
 
-declare class HttpStatus {
+declare class HttpClients {
     private constructor();
-    static errorFrom(res: Response, message?: string, type?: string): InvalidCredentialsError | NotFoundError | UnavailableError | UnsupportedError | UnimplementedError | InvalidArgumentError | PermissionDeniedError | PreconditionFailedError | RateLimitedError | InternalServerError | NetworkError | TimedOutError;
+    static makeError(res: Response, message?: string, type?: string): InvalidCredentialsError | UnavailableError | NotFoundError | UnsupportedError | UnimplementedError | InvalidArgumentError | PermissionDeniedError | PreconditionFailedError | RateLimitedError | InternalServerError | NetworkError | TimedOutError;
 }
 
-type index_ApiKey = ApiKey;
-declare const index_ApiKey: typeof ApiKey;
-type index_ApiRequest = ApiRequest;
-declare const index_ApiRequest: typeof ApiRequest;
-type index_Credentials = Credentials;
-declare const index_Credentials: typeof Credentials;
-declare const index_DefaultServiceProvider: typeof DefaultServiceProvider;
-type index_HttpStatus = HttpStatus;
-declare const index_HttpStatus: typeof HttpStatus;
-type index_Service = Service;
-declare const index_Service: typeof Service;
-type index_ServiceMethod = ServiceMethod;
-type index_ServiceOptions = ServiceOptions;
-type index_ServiceProvider = ServiceProvider;
-declare const index_ServiceProvider: typeof ServiceProvider;
-declare namespace index {
-  export {
-    index_ApiKey as ApiKey,
-    index_ApiRequest as ApiRequest,
-    Client$1 as Client,
-    index_Credentials as Credentials,
-    index_DefaultServiceProvider as DefaultServiceProvider,
-    index_HttpStatus as HttpStatus,
-    index_Service as Service,
-    index_ServiceMethod as ServiceMethod,
-    index_ServiceOptions as ServiceOptions,
-    index_ServiceProvider as ServiceProvider,
-    storage as Storage,
-    Transport$1 as Transport,
-  };
+declare class Config {
+    private static config;
+    private path;
+    private data;
+    constructor(path: string, data: any);
+    static read(path: string): Promise<any>;
+    static readSync(path: string): any;
+    static write(path: string, data: any): Promise<void>;
+    static loadConfig(path: string): Promise<Config>;
+    static loadConfigSync(path: string): Config;
+    static use(path?: string): void;
+    static get(path: string): any;
+    get(path: string): any;
+    set(path: string, value: any): void;
+    save(): Promise<void>;
 }
 
-export { index as Client, index$1 as OAuth };
+export { AccessToken, ApiKey, ApiRequest, Client$1 as Client, storage as ClientStorage, Config, CredentialStore, Credentials, DatabaseError, DefaultOAuthProvider, DefaultServiceProvider, HttpClients, IPCMessage, InvalidCredentialsError, InvalidScopeError, OAuthClient, OAuthConfig, OAuthError, OAuthIssuer, OAuthOptions, OAuthProvider, storage$1 as OAuthStorage, OAuthTools, RefreshToken, Scope, Scopes, Service, ServiceMethod, ServiceOptions, ServiceProvider, Token, Transport$1 as Transport, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError, launch };

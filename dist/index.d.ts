@@ -173,12 +173,12 @@ declare class OAuthProvider {
 }
 declare const DefaultOAuthProvider: OAuthProvider;
 
-interface IPCMessage {
-    event: string;
-    data: any;
+interface OAuthElectronIPCMessage {
+    ready?: true;
+    start?: true;
+    output?: any;
+    options?: KV<any>;
 }
-declare function launch(path: string, options?: any): Promise<any[]>;
-
 declare class OAuthTools {
     private static optionsFromCmdLine;
     static login(options?: {
@@ -186,6 +186,7 @@ declare class OAuthTools {
         scopes: string[];
         args: KV<any>;
     }): Promise<AccessToken>;
+    static launchElectronApplication(path: string, options?: KV<any>): Promise<any[]>;
 }
 
 interface ProtoMessage<T = any> {
@@ -383,4 +384,4 @@ declare class Config {
     save(): Promise<void>;
 }
 
-export { AccessToken, ApiKey, ApiRequest, Client$1 as Client, storage as ClientStorage, Config, CredentialStore, Credentials, DatabaseError, DefaultOAuthProvider, DefaultServiceProvider, HttpClients, IPCMessage, InvalidCredentialsError, InvalidScopeError, OAuthClient, OAuthConfig, OAuthError, OAuthIssuer, OAuthOptions, OAuthProvider, storage$1 as OAuthStorage, OAuthTools, RefreshToken, Scope, Scopes, Service, ServiceMethod, ServiceOptions, ServiceProvider, Token, Transport$1 as Transport, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError, launch };
+export { AccessToken, ApiKey, ApiRequest, Client$1 as Client, storage as ClientStorage, Config, CredentialStore, Credentials, DatabaseError, DefaultOAuthProvider, DefaultServiceProvider, HttpClients, InvalidCredentialsError, InvalidScopeError, OAuthClient, OAuthConfig, OAuthElectronIPCMessage, OAuthError, OAuthIssuer, OAuthOptions, OAuthProvider, storage$1 as OAuthStorage, OAuthTools, RefreshToken, Scope, Scopes, Service, ServiceMethod, ServiceOptions, ServiceProvider, Token, Transport$1 as Transport, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError };

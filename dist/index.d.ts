@@ -134,11 +134,11 @@ declare class AccessToken extends Token {
     client: string;
     scopes: Scopes;
     refresher: RefreshToken | undefined;
-    private refreshPromise?;
+    private refreshTask;
     constructor(args: AccessTokenInit);
     private assignToken;
     private doRefresh;
-    refresh(): Promise<any>;
+    refresh(): Promise<void>;
     revoke(): Promise<void>;
     get meta(): Metadata | undefined;
 }

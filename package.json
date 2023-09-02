@@ -16,6 +16,7 @@
     "@types/node": "^18.14.0",
     "@types/node-fetch": "^2.6.4",
     "@types/yargs": "^17.0.24",
+    "cmake-js": "^7.2.1",
     "git-publish": "^2.0.0",
     "tsup": "^7.2.0",
     "typescript": "^5.1.6"
@@ -29,8 +30,9 @@
     "mosaic_import_credentials": "./import_credentials"
   },
   "scripts": {
-    "build": "tsup-node --entry.index src/index.ts --entry.export_credentials src/tools/export_credentials.process.ts --entry.import_credentials src/tools/import_credentials.process.ts --minify --keep-names --target esnext --dts --treeshake",
-    "clean": "rm -rf dist",
+    "configure": "cmake-js configure",
+    "build": "cmake-js build",
+    "clean": "cmake-js clean && rm -rf dist",
     "cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
     "git-publish": "git-publish -b dist"
   }

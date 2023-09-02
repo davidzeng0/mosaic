@@ -26,6 +26,11 @@ export interface ServiceMethod{
 	transport: string[];
 }
 
+export interface ServiceImplementation{
+	protoOverREST?: ProtoServiceDefinition;
+	gRPC?: ProtoServiceDefinition;
+}
+
 export interface Service{
 	name: string;
 	id: string;
@@ -34,7 +39,7 @@ export interface Service{
 	endpoints: ServiceEndpoint[];
 	basePath?: string;
 	version?: string;
-	implementation?: ProtoServiceDefinition;
+	implementation?: ServiceImplementation;
 	methods?: ServiceMethod[];
 }
 

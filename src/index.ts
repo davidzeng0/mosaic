@@ -1,2 +1,3 @@
-export * as Client from './client';
-export * as OAuth from './oauth';
+export * from './client';
+export * from './oauth';
+export * from './config';

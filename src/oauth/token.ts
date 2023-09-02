@@ -1,5 +1,5 @@
 import { Credentials } from '@/client/credentials';
-import { Store, OAuthIssuer, InvalidCredentialsError, Scopes } from '.';
+import { CredentialStore, OAuthIssuer, InvalidCredentialsError, Scopes } from '.';
 import * as Storage from './storage';
 
 interface TokenInit{
@@ -78,7 +78,7 @@ export class AccessToken extends Token{
 	private async doRefresh(){
 		if(!this.id)
 			return this.assignToken(await this.issuer.refresh(this, this.refresher!));
-		await Store.synchronized(this, async (token) => {
+		await CredentialStore.synchronized(this, async (token) => {
 			if(token && token.secret != this.secret)
 				this.assignToken(token);
 			else

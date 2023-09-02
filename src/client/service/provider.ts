@@ -72,8 +72,10 @@ export class ServiceProvider{
 					throw new InvalidArgumentError(`Service cannot have both 'implementation' and 'methods'`);
 				let definition = service.implementation;
 
-				methods = ProtoServiceDefinition.methodsFrom(definition);
-
+				if(definition.protoOverREST)
+					methods = ProtoServiceDefinition.methodsFrom(definition.protoOverREST);
+				else if(definition.gRPC)
+					methods = ProtoServiceDefinition.methodsFrom(definition.gRPC);
 				delete service.implementation;
 			}else if(service.methods){
 				methods = this.methodsFrom(service.methods);

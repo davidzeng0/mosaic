@@ -5,4 +5,4 @@ export * from './error';
 export * from './credentials';
 export * from './transport';
 export * from './request';
-export * as Storage from './storage';
+export * as ClientStorage from './storage';

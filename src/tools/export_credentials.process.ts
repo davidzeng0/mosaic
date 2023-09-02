@@ -1,5 +1,4 @@
-import { Config } from 'protobuf-ts';
-import { OAuth } from '@/index';
+import { Config, CredentialStore, OAuthStorage } from '@/index';
 import { InvalidArgumentError, NotFoundError } from 'js-common';
 
 import { hideBin } from 'yargs/helpers';
@@ -9,7 +8,7 @@ import yargs from 'yargs';
 	let args = yargs(hideBin(process.argv)).parseSync() as any;
 	let output = args._.join(' ') || 'credentials.yaml';
 
-	Config.use(args.config ?? 'config.yaml');
+	Config.use(args.config);
 
 	let credentials;
 
@@ -25,7 +24,7 @@ import yargs from 'yargs';
 		dbName = Config.get('credentials/database');
 	if(!url || !dbName)
 		throw new InvalidArgumentError('No db to export from. Please set the mongodb/url and credentials/database keys in the config');
-	let database = new OAuth.DatabaseStorageMedium(url, dbName)
+	let database = new CredentialStore['DatabaseStorageMedium'](url, dbName)
 
 	let keys = await database.listAllKeys();
 	let refresh = await database.listAllRefreshTokens();
@@ -47,7 +46,7 @@ import yargs from 'yargs';
 		credentials.get('keys')[key] = value;
 	}
 
-	let refreshTokens = new Map<string, OAuth.Storage.RefreshToken>();
+	let refreshTokens = new Map<string, OAuthStorage.RefreshToken>();
 
 	for(let token of credentials.get('refreshTokens'))
 		refreshTokens.set(token.id, {...token, _id: undefined});
@@ -55,7 +54,7 @@ import yargs from 'yargs';
 		refreshTokens.set(token.id!, {...token, _id: undefined} as any);
 	credentials.set('refreshTokens', Array.from(refreshTokens.values()));
 
-	let accessTokens = new Map<string, OAuth.Storage.AccessToken>();
+	let accessTokens = new Map<string, OAuthStorage.AccessToken>();
 
 	for(let token of credentials.get('accessTokens'))
 		accessTokens.set(token.id, {...token, _id: undefined});

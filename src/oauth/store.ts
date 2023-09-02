@@ -1,10 +1,10 @@
 import { ExistsError, GenericError, KV, NotFoundError, Promises, Timer, UnavailableError } from 'js-common';
 import { DefaultOAuthProvider, AccessToken, RefreshToken, Token } from '.';
-import { Collection, Db, MongoClient, ObjectId } from 'mongodb';
-import { Config } from 'protobuf-ts';
+import { Collection, MongoClient, ObjectId } from 'mongodb';
+import { Config } from '@/index';
 import * as Storage from './storage';
 
-class DatabaseError extends GenericError{
+export class DatabaseError extends GenericError{
 	constructor(arg?: any){
 		super(arg, 'Database error');
 	}
@@ -193,7 +193,7 @@ class MemoryStorageMedium extends StorageMedium{
 	}
 }
 
-export class DatabaseStorageMedium extends StorageMedium{
+class DatabaseStorageMedium extends StorageMedium{
 	url;
 	db;
 
@@ -604,7 +604,8 @@ class FileStorageMedium extends MemoryStorageMedium{
 	}
 }
 
-export class Store{
+export class CredentialStore{
+	private static DatabaseStorageMedium = DatabaseStorageMedium;
 	private static medium: StorageMedium;
 
 	private constructor(){}

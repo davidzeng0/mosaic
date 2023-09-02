@@ -1,5 +1,5 @@
-import { InvalidArgumentError, KV } from 'js-common';
-import { Client, Credentials, Transport } from '.';
+import { ApiError, GenericError, HttpHeader, InvalidArgumentError, KV, Mime, ParseError, SerializeError } from 'js-common';
+import { ApiRequest, Client, Credentials, Transport } from '.';
 import { Scopes } from '@/oauth';
 import * as Storage from './storage';
 
@@ -158,5 +158,67 @@ export class Service{
 			params,
 			options
 		};
+	}
+
+	protected preflight(){
+		if(!this.host)
+			throw new InvalidArgumentError(`Service '${this}' cannot be used without a valid host`);
+		if(!this.transport)
+			throw new InvalidArgumentError(`Service '${this}' cannot be used without a valid transport`);
+	}
+
+	protected getFullPath(path: string){
+		let fullPath = [];
+
+		if(this.basePath)
+			fullPath.push(this.basePath);
+		if(this.version)
+			fullPath.push(this.version);
+		fullPath.push(path);
+
+		return fullPath.join('/');
+	}
+
+	protected async transact(method: string, path: string, transport: Transport, contentType: string | undefined, message: any){
+		let request = new ApiRequest();
+
+		request.setMethod(method);
+		request.url.setHost(this.host);
+		request.url.setPath(path);
+
+		if(this.params)
+			request.url.setParams(this.params);
+		request.setHeader(HttpHeader.CONTENT_TYPE, contentType);
+
+		if(this.headers)
+			request.setHeaders(this.headers);
+		try{
+			request.body = transport.encode(message);
+		}catch(e){
+			if(!(e instanceof GenericError))
+				throw new SerializeError(e);
+			throw e;
+		}
+
+		let response = await this.client.request(request, this.options);
+
+		if(transport.response !== undefined){
+			let type = response.headers.get(HttpHeader.CONTENT_TYPE);
+
+			if(!type || (type !== transport.response && !Mime.typeEquals(type, transport.response)))
+				throw new ApiError(`Expected content type '${transport.response}' but got '${type}'`);
+		}
+
+		try{
+			return transport.decode(response.body);
+		}catch(e){
+			if(!(e instanceof GenericError))
+				throw new ParseError(e);
+			throw e;
+		}
+	}
+
+	toString(){
+		return this.id;
 	}
 }

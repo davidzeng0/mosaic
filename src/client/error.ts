@@ -1,10 +1,10 @@
 import { ClientError, HttpError, InternalServerError, InvalidArgumentError, NetworkError, NotFoundError, PermissionDeniedError, PreconditionFailedError, RateLimitedError, Response, ServerError, TimedOutError, UnavailableError, UnimplementedError, UnsupportedError } from 'js-common';
 import { InvalidCredentialsError } from '@/oauth';
 
-export class HttpStatus{
+export class HttpClients{
 	private constructor(){}
 
-	static errorFrom(res: Response, message?: string, type?: string){
+	static makeError(res: Response, message?: string, type?: string){
 		if(type)
 			message = message ? `${type}: ${message}` : type;
 		if(!message)

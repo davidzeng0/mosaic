@@ -6,9 +6,9 @@ npm i github:davidzeng0/mosaic#dist
 ```
 
 ## Using a config file
-Create a config file in your project named `config.yaml`, and call
+Create a config file in your project named `mosaic_config.yaml`, and call
 ```ts
 import { Config } from 'mosaic';
 
-Config.use('config.yaml');
+Config.use('mosaic_config.yaml');
 ```

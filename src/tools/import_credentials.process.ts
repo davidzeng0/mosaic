@@ -1,6 +1,5 @@
-import { Config } from 'protobuf-ts';
 import { InvalidArgumentError, KV } from 'js-common';
-import { OAuth } from '@/index';
+import { Config, CredentialStore } from '@/index';
 
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs';
@@ -9,7 +8,7 @@ import yargs from 'yargs';
 	let args = yargs(hideBin(process.argv)).parseSync() as any;
 	let input = args._.join(' ') || 'credentials.yaml';
 
-	Config.use(args.config ?? 'config.yaml');
+	Config.use(args.config);
 
 	let credentials = Config.loadConfigSync(input);
 
@@ -17,7 +16,7 @@ import yargs from 'yargs';
 		dbName = Config.get('credentials/database');
 	if(!url || !dbName)
 		throw new InvalidArgumentError('No db to import to. Please set the mongodb/url and credentials/database keys in the config');
-	let database = new OAuth.DatabaseStorageMedium(url, dbName);
+	let database = new CredentialStore['DatabaseStorageMedium'](url, dbName);
 
 	await database.setup();
 

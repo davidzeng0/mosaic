@@ -1,5 +1,6 @@
 import { Credentials } from '@/client/credentials';
 import { CredentialStore, OAuthIssuer, InvalidCredentialsError, Scopes } from '.';
+import { ConcurrentPromise } from 'js-common';
 import * as Storage from './storage';
 
 interface TokenInit{
@@ -57,7 +58,7 @@ export class AccessToken extends Token{
 	scopes;
 	refresher;
 
-	private refreshPromise?: Promise<any>;
+	private refreshTask = new ConcurrentPromise(() => this.doRefresh());
 
 	constructor(args: AccessTokenInit){
 		super(args);
@@ -89,15 +90,7 @@ export class AccessToken extends Token{
 	refresh(){
 		if(!this.refresher)
 			throw new InvalidCredentialsError('No refresh token');
-		if(!this.refreshPromise){
-			this.refreshPromise = this.doRefresh();
-
-			this.refreshPromise.finally(() => {
-				this.refreshPromise = undefined;
-			});
-		}
-
-		return this.refreshPromise;
+		return this.refreshTask.run();
 	}
 
 	revoke(){

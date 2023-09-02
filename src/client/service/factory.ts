@@ -1,8 +1,15 @@
 import { KV, UnsupportedError } from 'js-common';
 import { Service, ServiceMethod } from '../service';
+import { Transport } from '../transport';
 import * as Storage from '../storage';
 
 export class ServiceFactory{
+	private static bindTransact(method: string, path: string, transport: Transport, contentType: string | undefined){
+		return function(this: Service, message: any){
+			this.transact(method, path, transport, contentType, message);
+		};
+	}
+
 	private static installMethod(service: Storage.Service, prototype: KV<any>, name: string, method: ServiceMethod){
 		prototype[name] = function(this: Service, message: any){
 			this.preflight();
@@ -27,7 +34,7 @@ export class ServiceFactory{
 					scopes = this.scopes;
 			}
 
-			let transact = this.transact.bind(this,
+			let transact = ServiceFactory.bindTransact(
 				method.method,
 				this.getFullPath(path),
 				transport,
@@ -36,7 +43,7 @@ export class ServiceFactory{
 
 			prototype[name] = transact;
 
-			return transact(message);
+			return transact.call(this, message);
 		};
 	}
 

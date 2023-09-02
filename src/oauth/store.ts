@@ -1,4 +1,4 @@
-import { ExistsError, GenericError, KV, NotFoundError, Promises, Timer, UnavailableError } from 'js-common';
+import { ConcurrentPromise, ExistsError, GenericError, KV, NotFoundError, Promises, Timer, UnavailableError } from 'js-common';
 import { DefaultOAuthProvider, AccessToken, RefreshToken, Token } from '.';
 import { Collection, MongoClient, ObjectId } from 'mongodb';
 import { Config } from '@/index';
@@ -493,9 +493,7 @@ class DatabaseStorageMedium extends StorageMedium{
 
 class FileStorageMedium extends MemoryStorageMedium{
 	config;
-
-	saving?: Promise<void>;
-	queuedSave = false;
+	saveTask = new ConcurrentPromise(() => this.saveImpl(), {queueRun: true});
 
 	constructor(filename: string){
 		super();
@@ -547,24 +545,11 @@ class FileStorageMedium extends MemoryStorageMedium{
 	}
 
 	async save(){
-		if(this.saving){
-			this.queuedSave = true;
-
-			return;
+		try{
+			await this.saveTask.run();
+		}catch(e: any){
+			console.error(`Failed to save credentials: ${e.stack ?? e.message}`);
 		}
-
-		do{
-			this.queuedSave = false;
-			this.saving = this.saveImpl();
-
-			try{
-				await this.saving;
-			}catch(e: any){
-				console.error(`Failed to save credentials: ${e.stack ?? e.message}`);
-			}
-		}while(this.queuedSave);
-
-		this.saving = undefined;
 	}
 
 	override setKey(key: string, value: string){

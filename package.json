@@ -13,6 +13,10 @@
 		"yargs": "^17.7.1"
 	},
 	"devDependencies": {
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/github": "^9.0.5",
+		"@semantic-release/npm": "^10.0.5",
 		"@types/node": "^18.14.0",
 		"@types/node-fetch": "^2.6.4",
 		"@types/yargs": "^17.0.24",
@@ -35,6 +39,7 @@
 		"clean": "cmake-js clean && rm -rf dist",
 		"cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
 		"prepare": "yarn clean && yarn build",
-		"git-publish": "git-publish -b dist"
+		"git-publish": "git-publish -b dist",
+		"test": "echo OK - no tests to run"
 	}
 }

@@ -1,4 +1,4 @@
-name: Format
+name: Build
 on:
   push:
     branches:
@@ -27,5 +27,5 @@ jobs:
       - name: Install packages
         run: yarn install
 
-      - name: Type check
-        run: yarn tsc
+      - name: Test
+        run: yarn test

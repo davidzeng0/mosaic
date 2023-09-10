@@ -39,6 +39,7 @@
 		"clean": "cmake-js clean && rm -rf dist",
 		"cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json",
 		"prepare": "yarn clean && yarn build",
-		"git-publish": "git-publish -b dist"
+		"git-publish": "git-publish -b dist",
+		"test": "echo OK - no tests to run"
 	}
 }

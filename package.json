@@ -22,6 +22,7 @@
 		"@types/yargs": "^17.0.24",
 		"cmake-js": "^7.2.1",
 		"git-publish": "^2.0.0",
+		"semantic-release": "^21.1.1",
 		"tsup": "^7.2.0",
 		"typescript": "^5.1.6"
 	},

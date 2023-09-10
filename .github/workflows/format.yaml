@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.version }}
 
-      - name: Install depend{encies
+      - name: Install dependencies
         run: sudo apt install -y cmake
 
       - name: Install packages

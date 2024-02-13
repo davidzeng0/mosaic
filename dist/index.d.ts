@@ -95,12 +95,7 @@ interface Issuer {
 type storage$1_Issuer = Issuer;
 type storage$1_Metadata = Metadata;
 declare namespace storage$1 {
-  export {
-    AccessToken$1 as AccessToken,
-    storage$1_Issuer as Issuer,
-    storage$1_Metadata as Metadata,
-    RefreshToken$1 as RefreshToken,
-  };
+  export type { AccessToken$1 as AccessToken, storage$1_Issuer as Issuer, storage$1_Metadata as Metadata, RefreshToken$1 as RefreshToken };
 }
 
 interface TokenInit {
@@ -300,15 +295,7 @@ type storage_ServiceEndpoint = ServiceEndpoint;
 type storage_ServiceImplementation = ServiceImplementation;
 type storage_Transport = Transport;
 declare namespace storage {
-  export {
-    storage_Client as Client,
-    storage_ClientOption as ClientOption,
-    Service$1 as Service,
-    storage_ServiceEndpoint as ServiceEndpoint,
-    storage_ServiceImplementation as ServiceImplementation,
-    ServiceMethod$1 as ServiceMethod,
-    storage_Transport as Transport,
-  };
+  export type { storage_Client as Client, storage_ClientOption as ClientOption, Service$1 as Service, storage_ServiceEndpoint as ServiceEndpoint, storage_ServiceImplementation as ServiceImplementation, ServiceMethod$1 as ServiceMethod, storage_Transport as Transport };
 }
 
 interface ServiceMethod {
@@ -384,4 +371,4 @@ declare class Config {
     save(): Promise<void>;
 }
 
-export { AccessToken, ApiKey, ApiRequest, Client$1 as Client, storage as ClientStorage, Config, CredentialStore, Credentials, DatabaseError, DefaultOAuthProvider, DefaultServiceProvider, HttpClients, InvalidCredentialsError, InvalidScopeError, OAuthClient, OAuthConfig, OAuthElectronIPCMessage, OAuthError, OAuthIssuer, OAuthOptions, OAuthProvider, storage$1 as OAuthStorage, OAuthTools, RefreshToken, Scope, Scopes, Service, ServiceMethod, ServiceOptions, ServiceProvider, Token, Transport$1 as Transport, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError };
+export { AccessToken, ApiKey, ApiRequest, Client$1 as Client, storage as ClientStorage, Config, CredentialStore, Credentials, DatabaseError, DefaultOAuthProvider, DefaultServiceProvider, HttpClients, InvalidCredentialsError, InvalidScopeError, type OAuthClient, type OAuthConfig, type OAuthElectronIPCMessage, OAuthError, OAuthIssuer, type OAuthOptions, OAuthProvider, storage$1 as OAuthStorage, OAuthTools, RefreshToken, type Scope, Scopes, Service, type ServiceMethod, type ServiceOptions, ServiceProvider, Token, Transport$1 as Transport, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError };
